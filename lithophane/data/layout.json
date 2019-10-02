@@ -45,11 +45,11 @@
                     "title": "Model Settings",
                     "hint" : "Set model parameters",
                     "values": [
-                        {   "type":"range", "name": "maxOutputDimensionInMM", "title": "Maximum Size (MM)"  , "minVal":   1  , "maxVal": 1000, "step":  1  , "value": 100   },
+                        {   "type":"range", "name": "maxOutputDimensionInMM", "title": "Maximum Size (MM)"  , "minVal":   1  , "maxVal": 1000, "step":  1  , "value": 152   },
                         {   "type":"range", "name": "actualThicknessInMM"   , "title": "Thickness (MM)"     , "minVal":   1  , "maxVal":   50, "step":  0.1, "value":   3   },
-                        {   "type":"range", "name": "borderThicknessInMM"   , "title": "Border (MM)"        , "minVal":   0  , "maxVal":   50, "step":  0.1, "value":   0   },
+                        {   "type":"range", "name": "borderThicknessInMM"   , "title": "Border (MM)"        , "minVal":   0  , "maxVal":   50, "step":  0.1, "value":   2   },
                         {   "type":"range", "name": "minThicknessInMM"      , "title": "Thinnest Layer (MM)", "minVal":   0.1, "maxVal":  100, "step":  0.1, "value":   0.8 },
-                        {   "type":"range", "name": "vertexPixelRatio"      , "title": "Vectors Per Pixel"  , "minVal":   1  , "maxVal":   10, "step":  1  , "value":   4   },
+                        {   "type":"range", "name": "vertexPixelRatio"      , "title": "Vectors Per Pixel"  , "minVal":   1  , "maxVal":   10, "step":  1  , "value":   5   },
                         {   "type":"range", "name": "baseDepth"             , "title": "Base/Stand Depth"   , "minVal": -50  , "maxVal":   50, "step":  1  , "value":   0   },
                         {   "type":"range", "name": "curve"                 , "title": "Curve"              , "minVal":   0  , "maxVal":  360, "step": 10  , "value":   0   }
                     ]
@@ -58,7 +58,7 @@
                     "title": "Image Settings",
                     "hint" : "Set image parameters",
                     "values" : [
-                        {   "type":"range", "name": "positive"      , "title": "Positive Image"   , "minVal": 0, "maxVal":  1, "step": 1, "value": 1, "onState": "Negative Image"},
+                        {   "type":"range", "name": "positive"      , "title": "Positive Image"   , "minVal": 0, "maxVal":  1, "step": 1, "value": 0, "onState": "Negative Image"},
                         {   "type":"range", "name": "mirror"        , "title": "Mirror Image Off" , "minVal": 0, "maxVal":  1, "step": 1, "value": 0, "onState": "Mirror Image On"},
                         {   "type":"range", "name": "flip"          , "title": "Flip Image Off"   , "minVal": 0, "maxVal":  1, "step": 1, "value": 0, "onState": "Flip Image On"  },
                         {   "type":"range", "name": "refresh"       , "title": "Manual Refresh"   , "minVal": 0, "maxVal":  1, "step": 1, "value": 1, "onState": "Refresh on Image Click" },
