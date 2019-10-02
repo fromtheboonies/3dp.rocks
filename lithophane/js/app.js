@@ -102,6 +102,16 @@
         this.triggerRefresh = function() {
             $scope.lithophane.createHeightMesh($scope.lithophane);
         }
+        this.set4x6Photo = function() {
+            $scope.lithophane.params.maxOutputDimensionInMM = 152; //6 inches
+            $scope.lithophane.updateValues($scope.lithophane);
+            this.triggerRefresh();
+        }
+        this.setWalletPhoto = function() {
+            $scope.lithophane.params.maxOutputDimensionInMM = 101; //4 inches
+            $scope.lithophane.updateValues($scope.lithophane);
+            this.triggerRefresh();
+        }
         this.initLithophane = function() {
             return $scope.lithophane.initPage($scope.lithophane);
         };
