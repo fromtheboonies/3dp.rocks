@@ -1,0 +1,19 @@
+{
+  "name": "lithophane",
+  "version": "1.0.0",
+  "description": "Utility for converting images to Lithophanes for 3D printing",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "http-server": "^0.11.1"
+  },
+  "engine": "node >=0.6.x",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "/"
+}
