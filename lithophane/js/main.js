@@ -613,6 +613,7 @@ LITHO.Lithophane.prototype = {
                 that.setProgress(80, that.StatusMessages.createSTL);
                 that.downloadSTL(that);
             }
+            
         }
     }
 };
@@ -734,6 +735,8 @@ LITHO.Scene3D.prototype = {
         else {
             var lithoGeometry = new THREE.Geometry();
         }
+        
+        
         this.setUp3DScene(lithoGeometry, vertexPixelRatio);
         render();
         window.addEventListener('resize', resizer,false);
@@ -748,12 +751,13 @@ LITHO.Scene3D.prototype = {
     setUp3DScene: function(lithoMesh,vertexPixelRatio) {
         try {
             this.scene = new THREE.Scene();
-            
+            var that = this;
+
             var showFloor=true;
             if (showFloor) {
                 var baseWidth = 300*vertexPixelRatio;
                 var divisions = Math.floor(baseWidth / (vertexPixelRatio * 10)); // 10mm grid
-                var groundMaterial = new THREE.MeshLambertMaterial({ color: 0x808080, wireframe: true , side: THREE.DoubleSide});
+                var groundMaterial = new THREE.MeshLambertMaterial({ color: 0x121212, wireframe: false , side: THREE.DoubleSide});
                 var groundPlane = new THREE.PlaneGeometry(baseWidth, baseWidth, divisions, divisions);
                 groundPlane.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0, -0.05));// move down a fraction so that object shows properly from underneath the floor
                 var ground = new THREE.Mesh(groundPlane, groundMaterial);
@@ -768,7 +772,7 @@ LITHO.Scene3D.prototype = {
             pointLight.position.set(3000, -4000, 3500);
             this.scene.add(pointLight);
             
-            var addBackLights=true;
+            var addBackLights=false;
             if (addBackLights) {
                 var spotLight = new THREE.SpotLight(0xffffff, 1, 0);
                 spotLight.position.set(-1000, 1000, -1000);
@@ -779,7 +783,7 @@ LITHO.Scene3D.prototype = {
                 pointLight.castShadow = false;
                 this.scene.add(pointLight);
             }
-            var material = new THREE.MeshPhongMaterial({ color: 0x001040, specular: 0x006080, side: THREE.DoubleSide,shininess: 10 });//
+            var material = new THREE.MeshPhongMaterial({ color: 0xB2B3B5, specular: 0xFFFFFF, side: THREE.DoubleSide,shininess: 0 });//
             var lithoPart = new THREE.Mesh(lithoMesh, material);
             this.scene.add(lithoPart);
             
@@ -789,11 +793,39 @@ LITHO.Scene3D.prototype = {
                 var lithoMeshPart = new THREE.Mesh(lithoPart.geometry, meshmaterial);
                 this.scene.add(lithoMeshPart);
             }
-            
+
             // TODO - Fix to show goemetry in camera better
             this.camera.position.x = 0;
             this.camera.position.y = -150*vertexPixelRatio;
             this.camera.position.z = 150*vertexPixelRatio;
+
+            var loader = new THREE.STLLoader();
+            loader.load( '../cannedObjects/litho_hanger_ring.stl', function ( geometry ) {
+                var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 0 } );
+                var left = new THREE.Mesh( geometry, material );
+                var right = left.clone();
+                var litho = that.scene.children[3];
+                debugger;
+                try{
+                    left.position.set(litho.geometry.parameters.width*-1, litho.geometry.parameters.height, 50);
+                    right.position.set(litho.geometry.parameters.width, litho.geometry.parameters.height, 50);
+                    
+                    left.name = "left";
+                    right.name = "right";
+                    //mesh.position.set(-200, -200, 50);
+                    //clone.position.set(200, 200, 50);
+                    //mesh.position.set( 0, - 0.25, 0.6 );
+                    //mesh.rotation.set( 0, - Math.PI / 2, 0 );
+                    //mesh.scale.set( 1, 1, 1 );
+                    //mesh.castShadow = true;
+                    //mesh.receiveShadow = true;
+                    that.scene.add( left );
+                    that.scene.add( right );
+                } catch (e) {
+                    console.log(e);
+                }
+                
+            });
         }
         catch (e) {
             console.log(e.message);
@@ -1307,7 +1339,7 @@ LITHO.LithoBox.prototype = {
         var gWidth = (toGeometry.boundingBox.max.x - toGeometry.boundingBox.min.x);
         var gHeight = (toGeometry.boundingBox.max.y - toGeometry.boundingBox.min.y);
         var gThick = (toGeometry.boundingBox.max.z - toGeometry.boundingBox.min.z);
-
+        
         if ((!this.panelledBack) && (curve === 0)) {
             toGeometry.center();
             toGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0, 0 - toGeometry.boundingBox.min.z));
@@ -1354,10 +1386,64 @@ LITHO.LithoBox.prototype = {
         } else if ((dome)&&(dometype===1)) {
             toGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(0-Math.PI/2 ));
         }
+        
+        
+
         toGeometry.center();
         toGeometry.computeBoundingBox();
         toGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0, 0 - toGeometry.boundingBox.min.z));
+    },
+/*******************************************************************************
+ * 
+ *  public addLithoHangers       Add hanger loops
+ * @param {Geometry} toGeometry  The geometry to modify
+ * @param {Number} WidthInMM  - output width in mm
+ * @param {Number} HeightInMM - output height in mm
+ * @param {Number} ThickInMM  - output thickness in mm
+ * @param {Number} borderThicknessInMM - output border in mm
+ * @param {Number} baseDepth - output thickness of base in mm
+ * @param {Number} vertexPixelRatio 
+ * @param {Number} curve
+ * @returns {undefined}
+ */
+    addLithoHangers: function(params) {
+        var toGeometry=params.lithoGeometry;
+        var WidthInMM=params.WidthInMM;
+        var HeightInMM=params.HeightInMM;
+        var ThickInMM=params.ThickInMM;
+        var borderThicknessInMM=params.borderThicknessInMM;
+        var baseDepth=params.baseDepth;
+        var vertexPixelRatio=params.vertexPixelRatio;
+        var curve=params.usecurve;
+        var dome=params.dome;
+        var dometype=params.dometype;
+        var pillow=params.pillow;
+        // adjust to exact size required - there is always 1 pixel less on the 
+        // width & height due to the vertices being positioned in the middle of each pixel
+        toGeometry.computeBoundingBox();
+        var gWidth = (toGeometry.boundingBox.max.x - toGeometry.boundingBox.min.x);
+        var gHeight = (toGeometry.boundingBox.max.y - toGeometry.boundingBox.min.y);
+        var gThick = (toGeometry.boundingBox.max.z - toGeometry.boundingBox.min.z);
+        var that = this;
+
+        var loader = new THREE.STLLoader();
+        loader.load( '../cannedObjects/litho_hanger_ring.stl', function ( geometry, $this ) {
+            var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 0 } );
+            var mesh = new THREE.Mesh( geometry, material );
+            var clone = mesh.clone();
+            debugger;
+            mesh.position.set(-200, -200, 50);
+            clone.position.set(200, 200, 50);
+			//mesh.position.set( 0, - 0.25, 0.6 );
+			//mesh.rotation.set( 0, - Math.PI / 2, 0 );
+			//mesh.scale.set( 1, 1, 1 );
+			//mesh.castShadow = true;
+			//mesh.receiveShadow = true;
+            scene.add( mesh );
+            scene.add( clone );
+        });
     }
+
 };
 /*******************************************************************************
  * 
