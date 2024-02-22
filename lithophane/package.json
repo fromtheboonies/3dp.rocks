@@ -4,11 +4,10 @@
   "description": "Utility for converting images to Lithophanes for 3D printing",
   "main": "server.js",
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^4.18.2",
     "http-server": "^0.11.1"
   },
   "engine": "node >=0.6.x",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"

@@ -599,13 +599,14 @@ LITHO.Lithophane.prototype = {
         function doChunk5() {
             params.lithoGeometry.computeVertexNormals();
             lithoBox.addBaseSizePos(params);
-            lithoBox=undefined;
+           // lithoBox=undefined;
             that.setProgress(70, that.StatusMessages.aScene);
             setTimeout(doChunk6, 1);
         }
         function doChunk6() {
             that.scene3d.init3D(params,false);
             that.scene3d.setUp3DScene(params.lithoGeometry, params.vertexPixelRatio);
+            lithoBox.addLithoHangers(params);
             if ((that.params.createIGES)||(params.autodownload!==1)) {
                 //lithoGeometry=undefined;
                 that.setProgress(0, '');
@@ -738,6 +739,7 @@ LITHO.Scene3D.prototype = {
         
         
         this.setUp3DScene(lithoGeometry, vertexPixelRatio);
+        this.addLithoHangers()
         render();
         window.addEventListener('resize', resizer,false);
     },
@@ -761,15 +763,21 @@ LITHO.Scene3D.prototype = {
                 var groundPlane = new THREE.PlaneGeometry(baseWidth, baseWidth, divisions, divisions);
                 groundPlane.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0, -0.05));// move down a fraction so that object shows properly from underneath the floor
                 var ground = new THREE.Mesh(groundPlane, groundMaterial);
+                ground.name = 'ground';
+                ground.id = 'ground';
                 this.scene.add(ground);
             }
             
             var spotLight = new THREE.SpotLight(0xffffff, 1, 0);
             spotLight.position.set(-1000, 1000, 1000);
             spotLight.castShadow = false;
+            spotLight.id = 'spotLight';
+            spotLight.name = 'spotLight';
             this.scene.add(spotLight);
             var pointLight = new THREE.PointLight(0xffffff, 1, 0);
             pointLight.position.set(3000, -4000, 3500);
+            pointLight.name = 'pointLight';
+            pointLight.id = 'pointLight';
             this.scene.add(pointLight);
             
             var addBackLights=false;
@@ -785,6 +793,8 @@ LITHO.Scene3D.prototype = {
             }
             var material = new THREE.MeshPhongMaterial({ color: 0xB2B3B5, specular: 0xFFFFFF, side: THREE.DoubleSide,shininess: 0 });//
             var lithoPart = new THREE.Mesh(lithoMesh, material);
+            lithoPart.id = 'lithoPart';
+            lithoPart.name = 'lithoPart';
             this.scene.add(lithoPart);
             
             var showOverMesh = false;
@@ -799,19 +809,41 @@ LITHO.Scene3D.prototype = {
             this.camera.position.y = -150*vertexPixelRatio;
             this.camera.position.z = 150*vertexPixelRatio;
 
-            var loader = new THREE.STLLoader();
+            /*var loader = new THREE.STLLoader();
             loader.load( '../cannedObjects/litho_hanger_ring.stl', function ( geometry ) {
                 var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 0 } );
                 var left = new THREE.Mesh( geometry, material );
+                left.id = 'leftHanger';
+                left.name = 'leftHanger';
+                left.scale.set(3,3,3);
                 var right = left.clone();
+                right.id = 'rightHanger';
+                right.name = 'rightHanger';
+
                 var litho = that.scene.children[3];
                 debugger;
                 try{
-                    left.position.set(litho.geometry.parameters.width*-1, litho.geometry.parameters.height, 50);
-                    right.position.set(litho.geometry.parameters.width, litho.geometry.parameters.height, 50);
+
+                    //let cubeBoundingBox = new THREE.Box3().setFromObject(litho);
+                    //let boxSize = new THREE.Vector3();
+                    //cubeBoundingBox.getSize(boxSize);
+                    let x = litho.geometry.boundingBox.max.x;
+                    let y = litho.geometry.boundingBox.max.y;
+
                     
-                    left.name = "left";
-                    right.name = "right";
+                    //console.log('dimensions are ', boxSize);
+                    //left.position.set(litho.geometry.parameters.width*-1, litho.geometry.parameters.height, 50);
+                    //right.position.set(litho.geometry.parameters.width, litho.geometry.parameters.height, 50);
+                    //left.position.set(lithoMesh.boundingBox.max.x * -1, lithoMesh.boundingBox.max.y, 0);
+                    //right.position.set(lithoMesh.boundingBox.max.x, lithoMesh.boundingBox.max.y, 0);
+                    left.position.set(x * -1, y, 0);
+                    right.position.set(x, y, 0);
+                    //left.position.set(litho.geometry.parameters.width*-1, litho.geometry.parameters.height, 50);
+                    //right.position.set(litho.geometry.parameters.width, litho.geometry.parameters.height, 50);
+                    left.position.set(lithoMesh.boundingBox.max.x * -1, lithoMesh.boundingBox.max.y, 0);
+                    right.position.set(lithoMesh.boundingBox.max.x, lithoMesh.boundingBox.max.y, 0);
+
+                    
                     //mesh.position.set(-200, -200, 50);
                     //clone.position.set(200, 200, 50);
                     //mesh.position.set( 0, - 0.25, 0.6 );
@@ -825,7 +857,7 @@ LITHO.Scene3D.prototype = {
                     console.log(e);
                 }
                 
-            });
+            });*/
         }
         catch (e) {
             console.log(e.message);
@@ -1429,18 +1461,23 @@ LITHO.LithoBox.prototype = {
         var loader = new THREE.STLLoader();
         loader.load( '../cannedObjects/litho_hanger_ring.stl', function ( geometry, $this ) {
             var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 0 } );
-            var mesh = new THREE.Mesh( geometry, material );
-            var clone = mesh.clone();
+            var left = new THREE.Mesh( geometry, material );
+            left.id = 'leftHanger';
+            left.name = 'leftHanger';
+            left.scale.set(3,3,3);
+            var right = left.clone();
+            right.id = 'rightHanger';
+            right.name = 'rightHanger';
             debugger;
-            mesh.position.set(-200, -200, 50);
-            clone.position.set(200, 200, 50);
+            left.position.set(gWidth * -1, gHeight, 0);
+            right.position.set(gWidth, gHeight, 0);
 			//mesh.position.set( 0, - 0.25, 0.6 );
 			//mesh.rotation.set( 0, - Math.PI / 2, 0 );
-			//mesh.scale.set( 1, 1, 1 );
-			//mesh.castShadow = true;
-			//mesh.receiveShadow = true;
-            scene.add( mesh );
-            scene.add( clone );
+			
+            scene.add( left );
+            scene.add( right );
+
+            
         });
     }
 
